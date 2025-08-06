@@ -1,0 +1,165 @@
+Project Title: Predicting Student Depression using Logistic Regression
+
+
+Objective:
+- This project systematically evaluates students’ academic performance, psychological assessments, and lifestyle behaviors to develop a rigorously validated logistic regression model that  accurately forecasts each student’s risk of experiencing depression.
+-This project demonstrates practical machine learning skills including:
+Data preparation
+Pipeline automation
+Exploratory data analysis
+Model building and evaluation
+Real-world use case simulation
+
+
+
+Tools used-
+- Python with Jupyter Notebook
+- Scikit-learn for ML pipeline and logistic regression
+- Seaborn and Matplotlib for EDA visualizations
+- Pandas for data handling, data transforming, data cleaning
+
+
+
+Workflow:
+1)Importing Libraries
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score, roc_auc_score, RocCurveDisplay
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+
+Purpose:
+Imported all necessary libraries for:
+- Data handling (pandas, numpy)
+- Data Visualization (matplotlib, seaborn)
+- Machine learning and model evaluation (scikit-learn)
+
+
+2) Data Loading/Importing:
+data = pd.read_csv("student_depression_dataset.csv")
+data.info()
+data.isnull().sum()
+data.head()
+
+Purpose:
+- Loaded the dataset
+- Checked data types and null values
+- Displayed top rows of the dataset
+
+
+
+3) Exploratory Data Checking:
+data["Work Pressure"].unique()
+data["Job Satisfaction"].unique()
+data.drop("id", axis=1, inplace=True)
+
+Purpose:
+- Inspected unique categorical values
+- Removed the unnecessary ID column
+
+
+
+4) Data Visualization:
+sns.countplot(x='Depression', data=data)
+sns.boxplot(x='Depression', y='CGPA', data=data)
+sns.boxplot(x='Depression', y='Work/Study Hours', data=data)
+sns.heatmap(data.corr(numeric_only=True), annot=True)
+
+Purpose:
+Details - Distribution of Depression, CGPA vs Depression, Study Hours vs Depression, Heatmap of Correlations.
+
+Insights Obtained:
+- Students with lower CGPA or excessive academic/work pressure may have higher chances of depression.
+- Cor-relation matrix showed relationships between numeric variables.
+
+
+
+
+5) Preprocessing and Splitting:
+X = data.drop("Depression", axis=1)
+y = data["Depression"]
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+Purpose:
+- Separated features and target
+- Performed an 80-20 train-test split
+
+
+
+
+6)Pipeline Creation:
+numeric_features = X.select_dtypes(include=['int64', 'float64']).columns
+categorical_features = X.select_dtypes(include=['object']).columns
+
+preprocessor = ColumnTransformer([
+    ('num', StandardScaler(), numeric_features),
+    ('cat', OneHotEncoder(handle_unknown='ignore'), categorical_features)
+])
+
+model_pipeline = Pipeline([
+    ('preprocess', preprocessor),
+    ('classifier', LogisticRegression())
+])
+
+
+Purpose:
+- Created a full pipeline for:
+- Scaling numerical columns
+- Encoding categorical columns
+- Logistic Regression model training
+
+
+
+7)Model Training:
+model_pipeline.fit(X_train, y_train)
+
+
+
+8)Model Evaluation:
+y_pred = model_pipeline.predict(X_test)
+print(confusion_matrix(y_test, y_pred))
+print(classification_report(y_test, y_pred))
+print("Accuracy Score:", accuracy_score(y_test, y_pred))
+
+
+Evaluation:
+- Provided confusion matrix and precision/recall/F1-score
+- Printed accuracy score
+
+
+
+
+9)ROC Curve:
+RocCurveDisplay.from_estimator(model_pipeline, X_test, y_test)
+plt.title("ROC Curve - Logistic Regression")
+plt.show()
+
+
+Insight:
+- ROC curve visualized model performance
+- AUC would indicate how well the model separates the classes
+
+
+
+
+10)Custom Prediction:
+row_for_prediction = data.iloc[[11]]
+X_predict = row_for_prediction.drop("Depression", axis=1)
+prediction = model_pipeline.predict(X_predict)
+probability = model_pipeline.predict_proba(X_predict)
+
+Result:
+- Model was tested on an existing data row to simulate prediction
+
+
+
+Conclusion:
+- This project delivers a robust, end-to-end logistic regression pipeline for accurately identifying students at risk of depression. 
+- By encapsulating data cleaning, categorical encoding, and feature scaling within a single scikit-learn Pipeline, we ensure that every transformation is applied consistently during both training and inference. 
+- Comprehensive evaluation using accuracy, precision, recall, F1-score, and ROC AUC—alongside clear visualizations such as confusion matrices and ROC curves—demonstrates the model’s strong discriminative ability. 
+- Finally, the inclusion of a custom-input prediction interface illustrates real-world applicability, empowering educators and counselors to generate individualized risk assessments and drive timely, data-informed interventions.
